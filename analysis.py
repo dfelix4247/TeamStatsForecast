@@ -16,4 +16,30 @@ merged_df = merged_df.drop(columns=['LFS','RFS','HS','CK','FK','F'])
 
 merged_df.to_csv('merged_df.csv', index=False)
 
-print(merged_df)
+merged_df.head()
+merged_df.info()
+
+# drop column not related to shots taken or assists made
+merged_df = merged_df.drop(columns=['LFS','RFS','HS','CK','FK','F','XG-G','PKG','SHT%','KP','AD','AD%','G+A','FC','FS','RC','YC'])
+merged_df = merged_df.rename(columns={'G':'GOALS','xG':'EXPECTED_GOALS','S':'SHOTS','SOT':'SHOTS_ON_TARGET','A':'ASSISTS','OFF':'OFFSIDE','T':'TOCHES','GA':'GOALS_AGAINST','XGA':'EXPECTED_GOALS_AGAINST','CLR':'CLEARANCE','PKA':'PENALTY_KICKS_TAKEN'})
+#merged_df.to_csv('merged_df.csv', index=False)
+
+
+from sklearn.model_selection import train_test_split # type: ignore
+
+x = merged_df.drop(columns='SHOTS')
+y = merged_df['SHOTS']
+
+x_train, x_test, y_train, y_test = train_test_split(x,y, test_size=0.2, stratify=y, random_state=8)
+
+from sklearn.pipeline import Pipeline
+from category_encoders.target_encoder import TargetEncoder
+from xgboost import XGBClassifier
+
+estimators = [
+    ('encoder', TargetEncoder()),
+    ('clf',XGBClassifier(random_state=8))
+]
+
+pipe = Pipeline(steps=estimators)
+pipe 
